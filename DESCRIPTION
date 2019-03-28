@@ -1,0 +1,33 @@
+Package: ISI.Toolbox
+Title: R-Tools for the Institute of Urban Hydrology of the Technical University Dresden.
+Version: 1.1.1.8
+Authors@R: person("Christian", "Foerster", email = "chrisfoe23@aol.de", role = c("aut", "cre"))
+Description: This Package incoorporates basic functions for working with data. The tools can be divided into Regression-Tools, Plot-Tools, Filter-Tools, Generating-Tools, Manning-Strickler-Tools, Import-Tools and other genereal purpose scripts.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1.9000
+Depends: dygraphs,
+    zoo,
+    xts,
+    partitions,
+    lattice,
+    signal,
+    lubridate,
+    MASS,
+    XML,
+    foreach,
+    plotly,
+    FME
+Imports: dygraphs,
+    zoo,
+    xts,
+    partitions,
+    lattice,
+    signal,
+    lubridate,
+    MASS,
+    XML,
+    foreach,
+    plotly,
+    FME
