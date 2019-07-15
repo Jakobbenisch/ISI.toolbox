@@ -18,7 +18,7 @@ Depends: dygraphs,
     XML,
     foreach,
     plotly,
-    FME
+    FME,
     randomcoloR
 Imports: dygraphs,
     zoo,
@@ -31,5 +31,5 @@ Imports: dygraphs,
     XML,
     foreach,
     plotly,
-    FME
+    FME,
     randomcoloR
