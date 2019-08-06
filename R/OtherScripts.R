@@ -474,7 +474,7 @@ TimeZoneConverter=function(XTS,TZorigin="Europe/Berlin",TZdest="UTC"){
 #' Events=EventDetector(TS,fixed_limit = 35,quantile_limit = NULL)
 #' DynPlot(cbind(TS,Events))
 EventDetector=function(q_xts,quantile_limit=90,fixed_limit=NULL,min_duration_in_time_steps=180,padding_in_time_steps=600,padding_ratio=1/3,inpute_NA=TRUE,na_approx_max_gap=5){
-  df_numeric=as.numeric(q_xts)
+  df_numeric=na.omit(as.numeric(q_xts))
   if (!is.null(quantile_limit) & is.null(fixed_limit)){
     if(quantile_limit<1 | quantile_limit>99){stop("The quantile_limit must be between 1 and 99.")}
     q_lim=as.numeric(quantile(df_numeric,quantile_limit/100))
