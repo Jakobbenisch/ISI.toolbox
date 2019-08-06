@@ -794,3 +794,22 @@ Separate.To.HyS.HyW=function(TS){
   return(Separated)}
 
 
+#' A function for correcting offsets.
+#'
+#' A certain time period can be selected and corrected.
+#' @param TS Xts. A time series to be corrected.
+#' @return TS Xts. A time series with the corrections.
+#' @export
+#' @examples
+#' TS=DummyTS(days=30,Rain_off = TRUE)
+#' TS=rbind(CutTimeSeries(TS,start(TS)+24*3600,start(TS)+48*3600)+30,CutTimeSeriesDel(TS,start(TS)+24*3600,start(TS)+200*3600))
+#' TS_corr=CorrectOffset(TS,start(TS)+24*3600,start(TS)+200*3600,-30)
+#' DynPlot(cbind(TS,TS_corr))
+#'
+CorrectOffset=function(xts,start,end,offset){
+  xts.new=CutTimeSeries(xts,start,end)
+  xts.new=xts.new+offset
+  xts.old=CutTimeSeriesDel(xts,start,end)
+  xts.final<-rbind(xts.new,xts.old)
+  return(xts.final)
+}
