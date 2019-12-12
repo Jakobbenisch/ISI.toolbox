@@ -467,13 +467,14 @@ TimeZoneConverter=function(XTS,TZorigin="Europe/Berlin",TZdest="UTC"){
 #' @param padding_ratio Numeric value. Must be between 0.05 and 0.95. Specifies the padding backward in time (padding_in_time_steps x padding_ratio) and forward in time (padding_in_time_steps x (1-padding_ratio)).
 #' @param inpute_NA Boolean. If True the original time series containing NA values for all non event time steps will be returned. Else the original time series will be cut so that it only contains events.
 #' @param na_approx_max_gap Integer. Gaps in flow signal up to size na_approx_max_gap will be interpolated linearly. Greater gaps will be filled with zero.
+#' @param dry_weather Boolean. If you do not need events but dry weather times
 #' @return Xts with the desired timezone.
 #' @export
 #' @examples
 #' TS=DummyTS(days=50)
 #' Events=EventDetector(TS,fixed_limit = 35,quantile_limit = NULL)
 #' DynPlot(cbind(TS,Events))
-EventDetector=function(q_xts,quantile_limit=90,fixed_limit=NULL,min_duration_in_time_steps=180,padding_in_time_steps=600,padding_ratio=1/3,inpute_NA=TRUE,na_approx_max_gap=5){
+EventDetector=function(q_xts,quantile_limit=90,fixed_limit=NULL,min_duration_in_time_steps=180,padding_in_time_steps=600,padding_ratio=1/3,inpute_NA=TRUE,na_approx_max_gap=5,dry_weather=FALSE){
   df_numeric=na.omit(as.numeric(q_xts))
   if (!is.null(quantile_limit) & is.null(fixed_limit)){
     if(quantile_limit<1 | quantile_limit>99){stop("The quantile_limit must be between 1 and 99.")}
@@ -486,7 +487,9 @@ EventDetector=function(q_xts,quantile_limit=90,fixed_limit=NULL,min_duration_in_
   }else if(is.null(quantile_limit) & is.null(fixed_limit)){
     stop("Please provide either quantile_limit or fixed_limit.")
   }
-
+  if (isTRUE(inpute_NA) & isTRUE(dry_weather)) {
+    stop("You cannot set inpute_NA to TRUE and dry_weather to TRUE, choose only one TRUE. IF you need dry_weather set impute_NA=FALSE ")}
+  
   time_vec=time(q_xts)
   min_ts_in_min=min(diff(time_vec))
   df_uni=Add.NA( q_xts,by=60*min_ts_in_min)
@@ -523,5 +526,11 @@ EventDetector=function(q_xts,quantile_limit=90,fixed_limit=NULL,min_duration_in_
   }
   else{
     return (df_uni[!ev_boo])
+  }
+  if (dry_weather) {
+  return(df_uni[!ev_boo])
+  }
+  else {
+  return(df_uni[ev_boo])
   }
 }
