@@ -179,14 +179,16 @@ AllFilters = function(XTS){
 #' @examples
 #' XTS = CutTimeSeries(XTS, "2016-06-16 12:00", "2016-08-05 00:00")
 #'
-CutTimeSeries=function(TimeSeries,start,end){
-  TZ=tzone(TimeSeries)
-  ind1 = time(TimeSeries) >= strptime(start,format="%Y-%m-%d %H:%M",tz = TZ)
-  ind2 = time(TimeSeries) <= strptime(end,format="%Y-%m-%d %H:%M",tz = TZ)
-  TimeSeries = TimeSeries[ind1&ind2]
+CutTimeSeries=function (TimeSeries, start, end)
+{
+  TZ = tzone(TimeSeries)
+  ind1 = time(TimeSeries) >= format(strptime(format(start,"%Y-%m-%d %H:%M"), format = "%Y-%m-%d %H:%M",
+                                             tz = TZ),"%Y-%m-%d %H:%M")
+  ind2 = time(TimeSeries) <= format(strptime(format(end,"%Y-%m-%d %H:%M"), format = "%Y-%m-%d %H:%M",
+                                             tz = TZ),"%Y-%m-%d %H:%M")
+  TimeSeries = TimeSeries[ind1 & ind2]
   return(TimeSeries)
 }
-
 #' Function for cutting an xts vector
 #'
 #' The function deletes a time window of an xts vector
@@ -202,8 +204,10 @@ CutTimeSeries=function(TimeSeries,start,end){
 #'
 CutTimeSeriesDel=function(TimeSeries,start,end){
   TZ=tzone(TimeSeries)
-  ind1 = time(TimeSeries) >= strptime(start,format="%Y-%m-%d %H:%M",tz = TZ)
-  ind2 = time(TimeSeries) <= strptime(end,format="%Y-%m-%d %H:%M",tz = TZ)
+  ind1 = time(TimeSeries) >= format(strptime(format(start,"%Y-%m-%d %H:%M"), format = "%Y-%m-%d %H:%M",
+                                             tz = TZ),"%Y-%m-%d %H:%M")
+  ind2 = time(TimeSeries) <= format(strptime(format(end,"%Y-%m-%d %H:%M"), format = "%Y-%m-%d %H:%M",
+                                             tz = TZ),"%Y-%m-%d %H:%M")
   TimeSeries = TimeSeries[!(ind1&ind2)]
   return(TimeSeries)}
 
@@ -793,7 +797,6 @@ Separate.To.HyS.HyW=function(TS){
   names(Separated)=c("Hydrological Summer","Hydrological Winter")
   return(Separated)}
 
-
 #' A function for correcting offsets.
 #'
 #' A certain time period can be selected and corrected.
@@ -813,3 +816,4 @@ CorrectOffset=function(xts,start,end,offset){
   xts.final<-rbind(xts.new,xts.old)
   return(xts.final)
 }
+
