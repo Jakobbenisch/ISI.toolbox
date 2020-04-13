@@ -182,10 +182,10 @@ AllFilters = function(XTS){
 CutTimeSeries=function (TimeSeries, start, end)
 {
   TZ = tzone(TimeSeries)
-  ind1 = time(TimeSeries) >= format(strptime(format(start,"%Y-%m-%d %H:%M"), format = "%Y-%m-%d %H:%M",
-                                             tz = TZ),"%Y-%m-%d %H:%M")
-  ind2 = time(TimeSeries) <= format(strptime(format(end,"%Y-%m-%d %H:%M"), format = "%Y-%m-%d %H:%M",
-                                             tz = TZ),"%Y-%m-%d %H:%M")
+  ind1 = time(TimeSeries) >= format(as.POSIXct(start,tz=TZ),"%Y-%m-%d %H:%M:%S")
+
+  ind2 = time(TimeSeries) <= format(as.POSIXct(end,tz=TZ),"%Y-%m-%d %H:%M:%S")
+
   TimeSeries = TimeSeries[ind1 & ind2]
   return(TimeSeries)
 }
@@ -203,14 +203,13 @@ CutTimeSeries=function (TimeSeries, start, end)
 #' XTS = CutTimeSeriesDel(XTS, "2016-06-16 12:00", "2016-08-05 00:00")
 #'
 CutTimeSeriesDel=function(TimeSeries,start,end){
-  TZ=tzone(TimeSeries)
-  ind1 = time(TimeSeries) >= format(strptime(format(start,"%Y-%m-%d %H:%M"), format = "%Y-%m-%d %H:%M",
-                                             tz = TZ),"%Y-%m-%d %H:%M")
-  ind2 = time(TimeSeries) <= format(strptime(format(end,"%Y-%m-%d %H:%M"), format = "%Y-%m-%d %H:%M",
-                                             tz = TZ),"%Y-%m-%d %H:%M")
+  TZ = tzone(TimeSeries)
+  ind1 = time(TimeSeries) >= format(as.POSIXct(start,tz=TZ),"%Y-%m-%d %H:%M:%S")
+
+  ind2 = time(TimeSeries) <= format(as.POSIXct(end,tz=TZ),"%Y-%m-%d %H:%M:%S")
+
   TimeSeries = TimeSeries[!(ind1&ind2)]
   return(TimeSeries)}
-
 
 #' Function for deleting outliers in an xts vector
 #'
