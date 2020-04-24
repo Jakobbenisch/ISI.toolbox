@@ -1,6 +1,32 @@
 # ISI.toolbox
 
+## Installation of Depencies
 
+```R
+deps <- c(
+  "dygraphs",
+  "zoo",
+  "xts",
+  "partitions",
+  "lattice",
+  "signal",
+  "lubridate",
+  "MASS",
+  "XML",
+  "foreach",
+  "plotly",
+  "FME",
+  "randomcoloR",
+  "StreamMetabolism"
+  )
+  
+for (pkg in deps){
+  install.packages(pkg)
+}
+```
+
+## Development Tips
+```R
 ## Installation
 
 devtools::install_git(
@@ -28,3 +54,4 @@ check(package.path, cran=TRUE, manual=TRUE)
 
 ## build package for CRAN submission
 build(pkg=package.path)
+```
