@@ -20,6 +20,7 @@ Depends: dygraphs,
     plotly,
     FME,
     randomcoloR
+    StreamMetabolism
 Imports: dygraphs,
     zoo,
     xts,
@@ -33,3 +34,4 @@ Imports: dygraphs,
     plotly,
     FME,
     randomcoloR
+    StreamMetabolism
