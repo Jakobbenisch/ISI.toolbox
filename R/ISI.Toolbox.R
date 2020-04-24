@@ -122,6 +122,8 @@
 #'   \item{\link{EventDetector}}{A function for detection discharge events.}
 #'   \item{\link{BaseFlow}}{Calculates base flow Index of a flow hydrograph.}
 #'   \item{\link{EventIndex}}{Hysteresis index and first flush index function.}
+#'   \item{\link{CS}{Calculates maximum dissolved oxygen concentration in a open freshwater.}
+#'   \item{\link{nighttime.slope}}{Calculates Ecosystem Respiration (ER) [mgO2/L*d] and Reaeration Coefficient (kO2) [1/d]}
 #'   }}
 #'   \item{\strong{SN Transformation}}{
 #'   \describe{

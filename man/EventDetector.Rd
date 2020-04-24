@@ -6,7 +6,8 @@
 \usage{
 EventDetector(q_xts, quantile_limit = 90, fixed_limit = NULL,
   min_duration_in_time_steps = 180, padding_in_time_steps = 600,
-  padding_ratio = 1/3, inpute_NA = TRUE, na_approx_max_gap = 5)
+  padding_ratio = 1/3, inpute_NA = TRUE, na_approx_max_gap = 5,
+  dry_weather = FALSE)
 }
 \arguments{
 \item{q_xts}{Xts vector. Timeseries containing flow signal.}
@@ -24,6 +25,8 @@ EventDetector(q_xts, quantile_limit = 90, fixed_limit = NULL,
 \item{inpute_NA}{Boolean. If True the original time series containing NA values for all non event time steps will be returned. Else the original time series will be cut so that it only contains events.}
 
 \item{na_approx_max_gap}{Integer. Gaps in flow signal up to size na_approx_max_gap will be interpolated linearly. Greater gaps will be filled with zero.}
+
+\item{dry_weather}{Boolean. If you do not need events but dry weather times}
 }
 \value{
 Xts with the desired timezone.

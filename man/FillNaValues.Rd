@@ -6,8 +6,8 @@
 \usage{
 FillNaValues(XTS, use = "linear", maxgap = 4, Regkey = "POT",
   Poldegree = 2, Fourierdegree = 5, Gaprange = c(0, 60),
-  Allowed_NAs_in_Fill_Day = 0, Min_R = 0.85, cn_exclude_last_row = TRUE,
-  Regression100Points = FALSE)
+  Allowed_NAs_in_Fill_Day = 0, Min_R = 0.85,
+  cn_exclude_last_row = TRUE, Regression100Points = FALSE)
 }
 \arguments{
 \item{XTS}{Xts vetor. Data set with NA values to be filled. Depending in the use parameter different dimensions are required (see description).}

@@ -134,5 +134,3 @@ BaseFlow = function(Flow_XTS){
   names(result)=c("BFI","baseflow")
   return(result)
 }
-
-

@@ -5,9 +5,9 @@
 \title{A Simple Dynamic Plotter based on Dygraphs}
 \usage{
 DynPlot(X, Title = NULL, Ylab = NULL, Y2lab = NULL, Labels = seq(1,
-  dim(X)[2], 1), Dotsize = 1, YRange = NULL, Y2Range = NULL, colset = 2,
-  Axis = rep(1, dim(X)[2]), Events = NULL, Eventnames = NULL,
-  legendwidth = 200)
+  dim(X)[2], 1), Dotsize = 1, YRange = NULL, Y2Range = NULL,
+  colset = 2, Axis = rep(1, dim(X)[2]), Events = NULL,
+  Eventnames = NULL, legendwidth = 200)
 }
 \arguments{
 \item{X}{The xts to plot. For multiple use X=cbind(first,second,third)}
