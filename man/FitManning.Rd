@@ -4,9 +4,10 @@
 \alias{FitManning}
 \title{A function for fitting Manning Strickler to a h-Q-realtion.}
 \usage{
-FitManning(Geometry = c("EGG", "CIR", "REC", "TRA"), kst_I_start = c(80,
-  0.001), kst_I_lwr = c(50, 1e-04), kst_I_upr = c(150, 0.01),
-  modelfitmethod = "BFGS", h_vec, Q_vec, width, radius, alpha, beta)
+FitManning(Geometry = c("EGG", "CIR", "REC", "TRA"),
+  kst_I_start = c(80, 0.001), kst_I_lwr = c(50, 1e-04),
+  kst_I_upr = c(150, 0.01), modelfitmethod = "BFGS", h_vec, Q_vec,
+  width, radius, alpha, beta)
 }
 \arguments{
 \item{Geometry}{String that specifies the channels geometry. Valid options are 'EGG','CIR','REC' or 'TRA'.Default is "EGG".}

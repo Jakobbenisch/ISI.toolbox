@@ -4,7 +4,8 @@
 \alias{PlotKDH2D}
 \title{Plot Function}
 \usage{
-PlotKDH2D(M, savetofolder = NULL, ColBarRange = NULL, LogScale = FALSE)
+PlotKDH2D(M, savetofolder = NULL, ColBarRange = NULL,
+  LogScale = FALSE)
 }
 \arguments{
 \item{M}{Matrix from KDH function.}

@@ -4,7 +4,8 @@
 \alias{FourierRegression}
 \title{Linear Regression for Fourier Series.}
 \usage{
-FourierRegression(timeseries, orderoftransformation = 5, summary = TRUE)
+FourierRegression(timeseries, orderoftransformation = 5,
+  summary = TRUE)
 }
 \arguments{
 \item{timeseries}{xts vector.}

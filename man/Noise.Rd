@@ -4,7 +4,8 @@
 \alias{Noise}
 \title{A Generating Function}
 \usage{
-Noise(TS, PercentageNoise, Noisespread, Overlap = FALSE, NoiseSections = 1)
+Noise(TS, PercentageNoise, Noisespread, Overlap = FALSE,
+  NoiseSections = 1)
 }
 \arguments{
 \item{TS}{Xts vector in which the noise is to be inserted.}

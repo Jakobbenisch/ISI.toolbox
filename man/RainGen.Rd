@@ -5,8 +5,8 @@
 \title{A Generating Function}
 \usage{
 RainGen(Num_Days = 7, AnualP_mm = 600, Anual_Days_of_Rain = 121,
-  sampletime_min = 1, beta = list(0.3, 0.5, 0.5, c(0.5, 0.5), c(2, 2), c(2,
-  2)), Rain_per_day_xts = NULL)
+  sampletime_min = 1, beta = list(0.3, 0.5, 0.5, c(0.5, 0.5), c(2, 2),
+  c(2, 2)), Rain_per_day_xts = NULL)
 }
 \arguments{
 \item{Num_Days}{The number of days to be generated.}

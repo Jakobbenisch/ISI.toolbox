@@ -5,8 +5,8 @@
 \title{Function for decomposing an xts vector}
 \usage{
 Decompose4TXS(XTS, decomp = c("daily", "weekly", "monthly"),
-  sampletime = c("1-min", "5-min", "15-min", "1-hour"), typ = c("additive",
-  "multiplicative"))
+  sampletime = c("1-min", "5-min", "15-min", "1-hour"),
+  typ = c("additive", "multiplicative"))
 }
 \arguments{
 \item{XTS}{xts vector to be decomposed.}

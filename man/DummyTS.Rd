@@ -7,8 +7,9 @@
 DummyTS(days = 7, SampleTime_min = 1, sd_days = 0.25, Cunif = 0.01,
   Csd = 0.03, FouP = c(8.95652, -2.42785, -0.58782, -0.97698, -2.6713,
   0.34104, -0.14011, 0.10532, 0.57853, -0.15287, -0.15902),
-  AnualPrecipitation_mm = 600, Anual_Days_of_P = 100, Beta = list(0.3,
-  0.5, 0.5, c(0.5, 0.5), c(2, 2), c(2, 2)), Lin_Stor_Catchment_Area = 2800,
+  AnualPrecipitation_mm = 600, Anual_Days_of_P = 100,
+  Beta = list(0.3, 0.5, 0.5, c(0.5, 0.5), c(2, 2), c(2, 2)),
+  Lin_Stor_Catchment_Area = 2800,
   Lin_Stor_Number_of_Catchments_slow_fast = c(3, 1),
   Lin_Stor_Average_Lambda_slow_fast = c(1000, 100), Rain_off = FALSE,
   timezone = "UTC")
