@@ -179,13 +179,11 @@ AllFilters = function(XTS){
 #' @examples
 #' XTS = CutTimeSeries(XTS, "2016-06-16 12:00", "2016-08-05 00:00")
 #'
-CutTimeSeries=function (TimeSeries, start, end)
+CutTimeSeries = function (TimeSeries, start, end)
 {
   TZ = tzone(TimeSeries)
-  ind1 = time(TimeSeries) >= format(as.POSIXct(start,tz=TZ),"%Y-%m-%d %H:%M:%S")
-
-  ind2 = time(TimeSeries) <= format(as.POSIXct(end,tz=TZ),"%Y-%m-%d %H:%M:%S")
-
+  ind1 = time(TimeSeries) >= as.POSIXct(start, tz = TZ)
+  ind2 = time(TimeSeries) <= as.POSIXct(end, tz = TZ)
   TimeSeries = TimeSeries[ind1 & ind2]
   return(TimeSeries)
 }
@@ -204,10 +202,8 @@ CutTimeSeries=function (TimeSeries, start, end)
 #'
 CutTimeSeriesDel=function(TimeSeries,start,end){
   TZ = tzone(TimeSeries)
-  ind1 = time(TimeSeries) >= format(as.POSIXct(start,tz=TZ),"%Y-%m-%d %H:%M:%S")
-
-  ind2 = time(TimeSeries) <= format(as.POSIXct(end,tz=TZ),"%Y-%m-%d %H:%M:%S")
-
+  ind1 = time(TimeSeries) >= as.POSIXct(start, tz = TZ)
+  ind2 = time(TimeSeries) <= as.POSIXct(end, tz = TZ)
   TimeSeries = TimeSeries[!(ind1&ind2)]
   return(TimeSeries)}
 
