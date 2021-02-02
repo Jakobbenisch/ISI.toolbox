@@ -4,3 +4,5 @@
 .Ruserdata
 .Rbuildignore
 ISI.toolbox.Rproj
+install.sh
+ISI.toolbox.tar.gz
