@@ -160,9 +160,9 @@ DelZeroNegValues = function(vector,sign="<0",extendGap=0){
 #' TS=AllFilters(TS)
 #'
 AllFilters = function(XTS){
-  A=DeleteNAs(XTS)
-  A=DeleteNATimes(XTS)
-  A=DeleteDuplicteTime(XTS)
+  XTS=DeleteNAs(XTS)
+  XTS=DeleteNATimes(XTS)
+  XTS=DeleteDuplicteTime(XTS)
   return(XTS)
 }
 
