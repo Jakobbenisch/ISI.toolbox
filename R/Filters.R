@@ -184,6 +184,7 @@ CutTimeSeries = function (TimeSeries, start, end)
   TZ = tzone(TimeSeries)
   ind1 = time(TimeSeries) >= as.POSIXct(start, tz = TZ)
   ind2 = time(TimeSeries) <= as.POSIXct(end, tz = TZ)
+  if(ind2<ind1)print("care: end of time series is earlier than its start!")
   TimeSeries = TimeSeries[ind1 & ind2]
   return(TimeSeries)
 }
@@ -204,7 +205,8 @@ CutTimeSeriesDel=function(TimeSeries,start,end){
   TZ = tzone(TimeSeries)
   ind1 = time(TimeSeries) >= as.POSIXct(start, tz = TZ)
   ind2 = time(TimeSeries) <= as.POSIXct(end, tz = TZ)
-  TimeSeries = TimeSeries[!(ind1&ind2)]
+  if(ind2<ind1)print("care: end of time series is earlier than its start!")
+    TimeSeries = TimeSeries[!(ind1&ind2)]
   return(TimeSeries)}
 
 #' Function for deleting outliers in an xts vector
