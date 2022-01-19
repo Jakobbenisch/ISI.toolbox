@@ -157,13 +157,13 @@ DelZeroNegValues = function(vector,sign="<0",extendGap=0){
 #' @export
 #' @seealso  \link[ISI.Toolbox]{DeleteNATimes},\link[ISI.Toolbox]{DeleteDuplicteTime}
 #' @examples
-#' TS=AllFilters(DummyTS())
+#' TS=AllFilters(TS)
 #'
 AllFilters = function(XTS){
-  A=DeleteNAs(XTS)
-  A=DeleteNATimes(A)
-  A=DeleteDuplicteTime(A)
-  return(A)
+  XTS=DeleteNAs(XTS)
+  XTS=DeleteNATimes(XTS)
+  XTS=DeleteDuplicteTime(XTS)
+  return(XTS)
 }
 
 #' Function for cutting an xts vector
@@ -184,6 +184,7 @@ CutTimeSeries = function (TimeSeries, start, end)
   TZ = tzone(TimeSeries)
   ind1 = time(TimeSeries) >= as.POSIXct(start, tz = TZ)
   ind2 = time(TimeSeries) <= as.POSIXct(end, tz = TZ)
+  if(ind2<ind1){print("care: end of time series is earlier than its start!")}
   TimeSeries = TimeSeries[ind1 & ind2]
   return(TimeSeries)
 }
@@ -204,6 +205,7 @@ CutTimeSeriesDel=function(TimeSeries,start,end){
   TZ = tzone(TimeSeries)
   ind1 = time(TimeSeries) >= as.POSIXct(start, tz = TZ)
   ind2 = time(TimeSeries) <= as.POSIXct(end, tz = TZ)
+  if(ind2<ind1){print("care: end of time series is earlier than its start!")}
   TimeSeries = TimeSeries[!(ind1&ind2)]
   return(TimeSeries)}
 
@@ -517,8 +519,8 @@ Fourierperday=function(TS,order=4,accepltabledev=25, MinDataPointsDaily=400){
 #'
 #' The function uses fft to transform the xts vector to the magnitude frequency domain. Note that the first magnitude in of a n fft corresponds to the average offset of the entire signal. The plot does not contain this value, the returned vectors do.
 #' @param TS Xts vector to be transformed.
-#' @param dt The time step in days. (One Minute time step -> 1/24/60)
-#' @param Return_FreqMag_Sin_Cos Boolean. If TRUE the frequency vector and both the cosine and sine magnitudes separately will be returned.
+#' @param dt The times tep in days. (One Minute time step -> 1/24/60)
+#' @param Return_FreqMag_Sin_Cos Boolean. If TRUE the frequency vector and both the cosine and sine magnitudes seperately will be returned.
 #' @param Return_Freq_Mag_Phase Boolean. If TRUE the frequency vector, magnitude vector and phase vector will be returned.
 #' @param Plot_Freq_Mag Boolean. Returns the Frequency Magnitude plot.
 #' @param Ylim Vector of length 2. Set the plot's y axis limits.
@@ -730,6 +732,9 @@ Decompose4TXS=function(XTS,decomp=c("daily","weekly","monthly"),sampletime=c("1-
 #' @return Xts vector without drift.
 #' @export
 #' @examples
+#' x=DummyTS(Csd=1.3)
+#' A=Decompose4TXS(x)
+#' plot(A)
 #' t=seq(as.POSIXct("2016-01-01 00:00:00",tz="UTC"),as.POSIXct("2016-01-02 00:00:00",tz="UTC"),by="min")
 #' v=0.5*sin(seq(0,30*pi,length.out = length(t)))+1
 #' drift=seq(0,2,length.out = 720)
@@ -782,8 +787,8 @@ FixDrift=function(XTS_to_fix,Fix_Info){
 #'
 Separate.To.HyS.HyW=function(TS){
   Time=as.POSIXct(strftime(time(TS),format = "%m-%d %H:%M:%S"),format = "%m-%d %H:%M:%S",tz = tzone(TS))
-  start=as.POSIXct("01.05. 00:00:00",tz=tzone(TS),format="%d.%m. %H:%M:%S")
-  end=as.POSIXct("01.11. 00:00:00",tz=tzone(TS),format="%d.%m. %H:%M:%S")
+  start=as.POSIXct("01.05. 00:00:00",tz=tzone(TS1),format="%d.%m. %H:%M:%S")
+  end=as.POSIXct("01.11. 00:00:00",tz=tzone(TS1),format="%d.%m. %H:%M:%S")
   HyS=Time>start&Time<end
   Separated=list(TS[HyS],TS[!HyS])
   names(Separated)=c("Hydrological Summer","Hydrological Winter")
