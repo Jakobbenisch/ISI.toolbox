@@ -29,7 +29,7 @@ CS=function (Temp,Pressure){
 #' First step is calculation of sunset and sunrise. If your river is shaded true sunset and sunrise (solar irradiance close to zero) might differ from astronomical times. Use the setdel and risedel parameter to adjust delay (in seconds).\cr
 #' It is recommended to determine true sunset by modeling or measurement to improve accuracy of calculation.\cr
 #' Next Step is to identify nighttime DO-Minima.\cr
-#' Then temporal DO-Gradient (??DO/??t mgO2/L*d) and Saturationdeficit (DOsat-DO) in the time between sunset and DO-Minima is fitted by a linear function. Slope results kO2 and Intersept ER.\cr
+#' Then temporal DO-Gradient (delteaDO/deltat mgO2/L*d) and Saturationdeficit (DOsat-DO) in the time between sunset and DO-Minima is fitted by a linear function. Slope results kO2 and Intersept ER.\cr
 #' The timeseries has to be continuous, evenly spaced and without NA's.\cr
 #' Function uses NOAA sunrise sunset calculator.\cr
 #' For more details see: Hornberger, G.M., Kelly, M.G., 1975. Atmospheric reaeration in a river using productivity analysis. Journal of the Environmental Engineering Division 101, 729-739.
@@ -102,7 +102,7 @@ nighttime.slope=function(data,setdel,risedel,Start,End,tstep,tz,lat,long,plot,pl
 
     if (plot==TRUE) {
       emf(file=paste(c(plot_path,Date,".emf"),collapse = ""),width = 5,height = 5)
-      plot(a,b,xlab="Sättigungsdefizit [mg/L]",ylab="??DO/??t [mg O2/L*d]")
+      plot(a,b,xlab="Saettigungsdefizit [mg/L]",ylab="deltaDO/deltat [mg O2/L*d]")
       abline(ablm)
       mtext(text = paste("R=",round(summary(ablm)$r.squared,digits=3),"Int(ER)=",round(coef(ablm)[1],digits=3),"mgO2/L*d","Slp(kO2)=",round(coef(ablm)[2],digits=3),"1/d"),adj = 1,side = 3)
       dev.off()
