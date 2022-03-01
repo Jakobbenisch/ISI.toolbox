@@ -787,8 +787,8 @@ FixDrift=function(XTS_to_fix,Fix_Info){
 #'
 Separate.To.HyS.HyW=function(TS){
   Time=as.POSIXct(strftime(time(TS),format = "%m-%d %H:%M:%S"),format = "%m-%d %H:%M:%S",tz = tzone(TS))
-  start=as.POSIXct("01.05. 00:00:00",tz=tzone(TS1),format="%d.%m. %H:%M:%S")
-  end=as.POSIXct("01.11. 00:00:00",tz=tzone(TS1),format="%d.%m. %H:%M:%S")
+  start=as.POSIXct("01.05. 00:00:00",tz=tzone(TS),format="%d.%m. %H:%M:%S")
+  end=as.POSIXct("01.11. 00:00:00",tz=tzone(TS),format="%d.%m. %H:%M:%S")
   HyS=Time>start&Time<end
   Separated=list(TS[HyS],TS[!HyS])
   names(Separated)=c("Hydrological Summer","Hydrological Winter")
