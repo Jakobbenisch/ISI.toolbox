@@ -49,5 +49,6 @@ ReadTabletoXTS = function(filename, sep=",", format="%Y-%m-%d %X", header=FALSE,
 WriteXTStoTXT = function(TS,DirName="C:/Work/R/output.txt"){
   write.zoo(TS,file=DirName,col.names = T,sep=",", quote=FALSE, na="")}
 
+Sys.setenv(TZ="Etc/GMT-1")
 
 
