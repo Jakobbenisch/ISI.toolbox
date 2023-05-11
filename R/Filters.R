@@ -853,7 +853,7 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
       fixed_q=fixed_q[index(Q_test)]
       fixed_q=DeleteDuplicteTime(fixed_q,Print = F)}
     
-    q_xts=fixed_q ###does that work to override arguments?
+    q_xts=fixed_q 
     if(choice==2){stop("Fix timesteps manually")}}
   
   if (!is.null(quantile_limit) & is.null(fixed_limit)) {
@@ -904,8 +904,6 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
                             padding_in_time_steps * (1 - padding_ratio))) {
     ev_boo = extend_true(ev_boo)
   }
-  
-  ##hier müsste noch ein return rein, dass nur die gefilterte Zeitserie zurück gibt...
   
   if (single_events_in_list & !plot_single_events){
     
