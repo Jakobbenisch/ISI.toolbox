@@ -814,3 +814,152 @@ CorrectOffset=function(xts,start,end,offset){
   return(xts.final)
 }
 
+#' A function for detection Discharge Events.
+#'
+#' This functionwas designed to detect increase in flow. It finds events via 2 criteria, the exceedance of a limit value and the duration of exceedance. Both should be provided by the user.
+#' @param q_xts Xts vector. Timeseries containing flow signal.
+#' @param quantile_limit Numeric value. Is used for autosetting the limit value for event detection via the quantile of the flow distribution. The quantile_limit must be between 1 and 99.
+#' @param fixed_limit Numeric value. If desired a fixed flow limit can be set for event detection. (quantile_limit must be set to NULL in that case.)
+#' @param min_duration_in_time_steps Integer. The value speciefies the minimal number of timesteps that the limit value needs to be exceeded so that it will be recognized as event.
+#' @param padding_in_time_steps Integer. Padding for detected events, so that the begiing and end will also be captured.
+#' @param padding_ratio Numeric value. Must be between 0.05 and 0.95. Specifies the padding backward in time (padding_in_time_steps x padding_ratio) and forward in time (padding_in_time_steps x (1-padding_ratio)).
+#' @param na_approx_max_gap Integer. Gaps in flow signal up to size na_approx_max_gap will be interpolated linearly. Greater gaps will be filled with zero.
+#' @param single_events_in_list Boolean. Single events are separate entries in list
+#' @param plot_single_events Boolean. Single events are plotted using \link[ISI.Toolbox]{DynPlot}. Can be used for refining selection.
+#' @return Xts with the desired timezone. If single_events_in_list = T list with [[1]] xts events , [[2]] filtered xts. If plot_single_events = T list with [[1]] xts events , [[2]] filtered xts, [[3]] Plots.
+#' @export
+#' @examples
+#' TS=DummyTS(days=50)
+#' Events=EventDetector(TS,fixed_limit = 35,quantile_limit = NULL)
+#' DynPlot(cbind(TS,Events))
+EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_duration_in_time_steps = 180, 
+                        padding_in_time_steps = 600, padding_ratio = 1/3, na_approx_max_gap = Inf,  
+                        single_events_in_list=FALSE,plot_single_events=FALSE) 
+  
+{
+  ###prechecking data set for duplicates
+  if(is.integer(duplicated(time(q_xts)))){
+    stop("There are duplicates in xts - check and delete \n ?DeleteDuplicteTime")}
+  ###prechecking for differences in timesteps
+  checktimes=c(NA,difftime(index(q_xts[-1]),index(q_xts[-nrow(q_xts)]),units="secs"))
+  checktimestepsdiff=hist(checktimes,plot = F)
+  if(length(checktimestepsdiff$counts)>2){
+    choice<-menu(c("Yes","No"),title = paste0("Timesteps are not homogenous, consider unifying them to ",
+                                              checktimestepsdiff$breaks[which.max(checktimestepsdiff$breaks)]," seconds?"))
+    if (choice==1){ 
+      mintimevec=min(difftime(index(q_xts[-1]),index(q_xts[-nrow(q_xts)]),units="secs"))
+      fixed_q=FillNaValues(Add.NA(q_xts,by = mintimevec),use = "linear", maxgap = Inf)
+      Q_test=align.time(fixed_q,n = checktimestepsdiff$breaks[which.max(checktimestepsdiff$breaks)])
+      fixed_q=fixed_q[index(Q_test)]
+      fixed_q=DeleteDuplicteTime(fixed_q,Print = F)}
+    
+    q_xts=fixed_q ###does that work to override arguments?
+    if(choice==2){stop("Fix timesteps manually")}}
+  
+  if (!is.null(quantile_limit) & is.null(fixed_limit)) {
+    if (quantile_limit < 1 | quantile_limit > 99) {
+      stop("The quantile_limit must be between 1 and 99.")
+    }
+    q_lim = as.numeric(quantile(df_numeric, quantile_limit/100))
+    print(paste("Determined quantile limit:", toString(q_lim)))
+  }
+  else if (is.null(quantile_limit) & !is.null(fixed_limit)) {
+    q_lim = fixed_limit
+  }
+  else if (!is.null(quantile_limit) & !is.null(fixed_limit)) {
+    stop("Please only provide quantile_limit or fixed_limit.")
+  }
+  else if (is.null(quantile_limit) & is.null(fixed_limit)) {
+    stop("Please provide either quantile_limit or fixed_limit.")
+  }
+  
+  df_numeric = na.omit(as.numeric(q_xts))
+  min_ts_in_sek = min(difftime(index(q_xts[-1]),index(q_xts[-nrow(q_xts)]),units="secs"))
+  df_uni = Add.NA(q_xts, by = min_ts_in_sek)
+  df_uni = na.approx(df_uni, maxgap = na_approx_max_gap)
+  df_uni = na.fill(df_uni, 0)  # if larger than max_gap NAs will be set to zero, dont know if thats reasonable - let me know! 
+  boo = df_numeric > q_lim
+  ev_boo = rollapply(boo, width = min_duration_in_time_steps, 
+                     FUN = all)
+  ev_boo = c(ev_boo, rep(FALSE, min_duration_in_time_steps - 
+                           1))
+  extend_true = function(boolean, up = FALSE) {
+    len = length(boolean)
+    if (up) {
+      return(c(boolean[2:len], FALSE) | boolean)
+    }
+    else {
+      return(c(FALSE, boolean[1:(len - 1)]) | boolean)
+    }
+  }
+  
+  for (i in 1:(min_duration_in_time_steps - 1)) {
+    ev_boo = extend_true(ev_boo)
+  }
+  for (up in 1:as.integer(min_duration_in_time_steps/2 + padding_in_time_steps * 
+                          padding_ratio)) {
+    ev_boo = extend_true(ev_boo, up = TRUE)
+  }
+  for (down in 1:as.integer(min_duration_in_time_steps/2 + 
+                            padding_in_time_steps * (1 - padding_ratio))) {
+    ev_boo = extend_true(ev_boo)
+  }
+  
+  ##hier müsste noch ein return rein, dass nur die gefilterte Zeitserie zurück gibt...
+  
+  if (single_events_in_list & !plot_single_events){
+    
+    ##build a vector with 1/0 for event/no event
+    df_uni[!ev_boo] = NA
+    Events_logi=na.omit(df_uni)
+    Events_logi[,1]<-1
+    test=cbind(df_uni,Events_logi)
+    test=test[,2]
+    test[is.na(test)]<-0
+    check=(as.numeric(coredata(test)))
+    ##check for the intial change of 0->1 for beginn or 1->0 for end of event
+    final_start=c()
+    final_end=c()
+    for(i in 1:(length(check)-1)){if(check[i] == 0 & check[i+1] == 1) {vec=data.frame(index(df_uni[i]))
+    final_start=c(final_start,vec)}}
+    for(i in 1:(length(check)-1)){if(check[i] == 1 & check[i+1] == 0) {vec=data.frame(index(df_uni[i]))
+    final_end=c(final_end,vec)}}
+    list_of_events=list()
+    for (i in 1:length(final_start)){list_of_events[[i]]=CutTimeSeries(df_uni,final_start[[i]],final_end[[i]])}
+    return(list(list_of_events,df_uni))
+  }
+  else if(plot_single_events & single_events_in_list){
+    
+    ##build a vector with 1/0 for event/no event
+    df_uni[!ev_boo] = NA
+    Events_logi=na.omit(df_uni)
+    Events_logi[,1]<-1
+    test=cbind(df_uni,Events_logi)
+    test=test[,2]
+    test[is.na(test)]<-0
+    check=(as.numeric(coredata(test)))
+    ##check for the intial change of 0->1 for beginn or 1->0 for end of event
+    final_start=c()
+    final_end=c()
+    for(i in 1:(length(check)-1)){if(check[i] == 0 & check[i+1] == 1) {vec=data.frame(index(df_uni[i]))
+    final_start=c(final_start,vec)}}
+    for(i in 1:(length(check)-1)){if(check[i] == 1 & check[i+1] == 0) {vec=data.frame(index(df_uni[i]))
+    final_end=c(final_end,vec)}}
+    list_of_events=list()
+    for (i in 1:length(final_start)){list_of_events[[i]]=CutTimeSeries(df_uni,final_start[[i]],final_end[[i]])}
+    
+    #create plots
+    plot_events=list()
+    for (i in 1:length(list_of_events)){plot_events[[i]]=DynPlot(list_of_events[[i]],Title = paste(i))}
+    return(list(list_of_events,df_uni,plot_events))
+    
+  }
+  else{
+    return(df_uni[ev_boo])
+  }
+  
+  if(!single_events_in_list & plot_single_events){
+    stop("single_events_in_list must be also set to TRUE")
+  }
+  
+}
