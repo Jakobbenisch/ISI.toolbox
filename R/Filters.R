@@ -816,7 +816,7 @@ CorrectOffset=function(xts,start,end,offset){
 
 #' A function for detection Discharge Events.
 #'
-#' This functionwas designed to detect increase in flow. It finds events via 2 criteria, the exceedance of a limit value and the duration of exceedance. Both should be provided by the user.
+#' This function is designed to detect increase in flow. It finds events via 2 criteria, the exceedance of a limit value and the duration of exceedance. Both should be provided by the user.
 #' @param q_xts Xts vector. Timeseries containing flow signal.
 #' @param quantile_limit Numeric value. Is used for autosetting the limit value for event detection via the quantile of the flow distribution. The quantile_limit must be between 1 and 99.
 #' @param fixed_limit Numeric value. If desired a fixed flow limit can be set for event detection. (quantile_limit must be set to NULL in that case.)
