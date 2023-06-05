@@ -832,6 +832,7 @@ CorrectOffset=function(xts,start,end,offset){
 #' TS=DummyTS(days=50)
 #' Events=EventDetector(TS,fixed_limit = 35,quantile_limit = NULL)
 #' DynPlot(cbind(TS,Events))
+#' 
 EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_duration_in_time_steps = 180, 
                         padding_in_time_steps = 600, padding_ratio = 1/3, na_approx_max_gap = Inf,  
                         single_events_in_list=FALSE,plot_single_events=FALSE) 
