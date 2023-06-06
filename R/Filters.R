@@ -839,7 +839,7 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
   
 {
   ###prechecking data set for duplicates
-  if(is.integer(duplicated(time(q_xts)))){
+  if(any(duplicated(time(q_xts)))){
     stop("There are duplicates in xts - check and delete \n ?DeleteDuplicteTime")}
   ###prechecking for differences in timesteps
   checktimes=c(NA,difftime(index(q_xts[-1]),index(q_xts[-nrow(q_xts)]),units="secs"))
