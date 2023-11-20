@@ -838,6 +838,9 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
                         single_events_in_list=FALSE,plot_single_events=FALSE) 
   
 {
+  
+  df_numeric = na.omit(as.numeric(q_xts))
+  
   ###prechecking data set for duplicates
   if(any(duplicated(time(q_xts)))){
     stop("There are duplicates in xts - check and delete \n ?DeleteDuplicteTime")}
@@ -874,7 +877,6 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
     stop("Please provide either quantile_limit or fixed_limit.")
   }
   
-  df_numeric = na.omit(as.numeric(q_xts))
   min_ts_in_sek = min(difftime(index(q_xts[-1]),index(q_xts[-nrow(q_xts)]),units="secs"))
   df_uni = Add.NA(q_xts, by = min_ts_in_sek)
   df_uni = na.approx(df_uni, maxgap = na_approx_max_gap)
