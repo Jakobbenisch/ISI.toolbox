@@ -838,7 +838,7 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
                         single_events_in_list=FALSE,plot_single_events=FALSE) 
   
 {
-  
+  df_numeric = na.omit(as.numeric(q_xts))
   
   ###prechecking data set for duplicates
   if(any(duplicated(time(q_xts)))){
