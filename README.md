@@ -1,33 +1,10 @@
 # ISI.toolbox
 
-## Installation of Depencies
-
-```R
-deps <- c(
-  "dygraphs",
-  "zoo",
-  "xts",
-  "partitions",
-  "lattice",
-  "signal",
-  "lubridate",
-  "MASS",
-  "XML",
-  "foreach",
-  "plotly",
-  "FME",
-  "randomcoloR",
-  "StreamMetabolism"
-  )
-  
-for (pkg in deps){
-  install.packages(pkg)
-}
-```
-
 ## Development Tips
 ```R
 ## Installation
+
+library(devtools)
 
 devtools::install_git(
   "https://github.com/Jakobbenisch/ISI.toolbox.git"
