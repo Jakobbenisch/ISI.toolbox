@@ -963,3 +963,57 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
   }
   
 }
+
+
+#' A function for chzanging timestamps from CE(S)T to GMT+1
+#'
+#' The function correct timeserie with daylight saving times to GMT+1
+#' @param TS Xts. A time series to be changed
+#' @return Xts, timeseries adjusted to GMT+1
+#' @export
+#' @examples
+#' TS=DummyTS(days=800,Rain_off = TRUE)
+#' TS_GMT=fix_CEST_to_GMT(TS)
+#' DynPlot(cbind(TS_GMT,TS))
+#'
+
+fix_CEST_to_GMT=function(xts){
+  
+  corrected_summer=list()
+  corrected_summer[[1]]=(xts["2023-03-26 02:00:00/2023-10-29 03:00:00"])
+  corrected_summer[[2]]=(xts["2022-03-27 02:00:00/2022-10-30 03:00:00"])
+  corrected_summer[[3]]=(xts["2021-03-28 02:00:00/2021-10-31 03:00:00"])
+  corrected_summer[[4]]=(xts["2020-03-29 02:00:00/2020-10-25 03:00:00"])
+  corrected_summer[[5]]=(xts["2019-03-31 02:00:00/2019-10-27 03:00:00"])
+  corrected_summer[[6]]=(xts["2019-03-31 02:00:00/2019-10-27 03:00:00"])
+  corrected_summer[[7]]=(xts["2018-03-25 02:00:00/2018-10-28 03:00:00"])
+  corrected_summer[[8]]=(xts["2017-03-26 02:00:00/2017-10-29 03:00:00"])
+  corrected_summer[[9]]=(xts["2016-03-27 02:00:00/2016-10-30 03:00:00"])
+  corrected_summer[[10]]=(xts["2015-03-29 02:00:00/2015-10-25 03:00:00"])
+  corrected_summer[[11]]=(xts["2014-03-30 02:00:00/2014-10-26 03:00:00"])
+  corrected_summer[[12]]=(xts["2013-03-31 02:00:00/2013-10-27 03:00:00"])
+  corrected_summer[[13]]=(xts["2012-03-25 02:00:00/2012-10-28 03:00:00"])
+  
+  filtered_list_summer <- Filter(function(x) length(x) > 0, corrected_summer)
+  filtered_list_summer_concated=do.call("rbind",filtered_list_summer)
+  index(filtered_list_summer_concated)=index(filtered_list_summer_concated)-3600
+  
+  
+  exclude_range=c(xts["2023-03-26 02:00:00/2023-10-29 03:00:00"],
+                  xts["2022-03-27 02:00:00/2022-10-30 03:00:00"],
+                  xts["2021-03-28 02:00:00/2021-10-31 03:00:00"],
+                  xts["2020-03-29 02:00:00/2020-10-25 03:00:00"],
+                  xts["2019-03-31 02:00:00/2019-10-27 03:00:00"],
+                  xts["2019-03-31 02:00:00/2019-10-27 03:00:00"],
+                  xts["2018-03-25 02:00:00/2018-10-28 03:00:00"],
+                  xts["2017-03-26 02:00:00/2017-10-29 03:00:00"],
+                  xts["2016-03-27 02:00:00/2016-10-30 03:00:00"],
+                  xts["2015-03-29 02:00:00/2015-10-25 03:00:00"],
+                  xts["2014-03-30 02:00:00/2014-10-26 03:00:00"],
+                  xts["2013-03-31 02:00:00/2013-10-27 03:00:00"],
+                  xts["2012-03-25 02:00:00/2012-10-28 03:00:00"])
+  
+  xts_excluded_winter <- xts[!index(xts) %in% index(exclude_range)]
+  
+  GMT_ts=DeleteDuplicteTime(rbind(filtered_list_summer_concated,xts_excluded_winter))
+}
