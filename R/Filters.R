@@ -965,9 +965,9 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
 }
 
 
-#' A function for chzanging timestamps from CE(S)T to GMT+1
+#' A function for changing time stamps from CE(S)T to GMT-1
 #'
-#' The function correct timeserie with daylight saving times to GMT+1
+#' The function correct timeseries with daylight saving times to GMT-1
 #' @param TS Xts. A time series to be changed
 #' @return Xts, timeseries adjusted to GMT+1
 #' @export
