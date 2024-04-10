@@ -976,7 +976,6 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
 #' TS_GMT=fix_CEST_to_GMT(TS)
 #' DynPlot(cbind(TS_GMT,TS))
 #'
-
 fix_CEST_to_GMT=function(xts){
   
   corrected_summer=list()

@@ -8,6 +8,7 @@
 #' @param dec Decimal seperator of numbers.
 #' @param skip How many lines should be skipped when reading the document?
 #' @param linestoread Do you love cats?
+#' @param error_in_timestamp if TRUE error in timestamp of intial data is shown
 #' @param SpacesbeforeDateTime How many spaces are in front the date-time expression?
 #' @param TimeZone The timezone variable of the xts conversion. Note: Influx of our System is in CET, default tz is going to be "Etc/GMT-1"
 #' @param fill Boolean. Should gaps in be filled with NA? (For reading documents with a differing number of rows.)
@@ -19,8 +20,12 @@
 #' @examples
 #' TimeSeries=ReadTabletoXTS("C:/file.txt",header=TRUE)
 #'
-ReadTabletoXTS = function(filename, sep=",", format="%Y-%m-%d %X", header=FALSE, dec = ".", skip=0,linestoread=-1,SpacesbeforeDateTime=0,TimeZone="Etc/GMT-1",fill=FALSE,comment.char="",na.strings=c("#-1")){
+ReadTabletoXTS = function(filename, sep=",", format="%Y-%m-%d %X", header=FALSE, dec = ".", skip=0,linestoread=-1,SpacesbeforeDateTime=0,TimeZone="Etc/GMT-1",fill=FALSE,error_in_timestamp=F,comment.char="",na.strings=c("#-1")){
   data.4 <-read.table(filename, header=header, sep=sep,dec=dec,skip=skip, nrow = linestoread,fill=fill,comment.char = comment.char,na.strings=na.strings)
+  if(error_in_timestamp==T){
+    timestamp=as.POSIXct(data.4[,1],format=format)
+    print(paste0("check timestamp at: ",which(is.na(timestamp))))
+    }
   x=strsplit(format,split="%")[[1]][4]
   DateTimeSep=substring(x,2,nchar(x))
   if(sep!=DateTimeSep){
