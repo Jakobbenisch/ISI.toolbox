@@ -1016,3 +1016,83 @@ fix_CEST_to_GMT=function(xts){
   
   GMT_ts=DeleteDuplicteTime(rbind(filtered_list_summer_concated,xts_excluded_winter))
 }
+
+#' A function for editing unify timestamps with different intervalls
+#'
+#' This function is designed to unify or interpolate the time-index of a xts to a user defined intervall
+#' @param xts Xts vector. Timeseries containing a signal.
+#' @param change_intervall Boolean. Set TRUE if timestep intervall should be changed (e.g. from 15 min timestep to 10 min)
+#' @param default_timestep Integer. Minimum time step is assumed to be one minute, only if smaller than one minute adjust this value! Unit is in seconds
+#' @param desired_timestep Integer. Demanded new timestep intervall in seconds
+#' @param maxgap Integer. Specifies the maximum gap size that will be filled.
+#' @return cleaned and adjusted xts 
+#' @examples
+#' TS=DummyTS(days=10)
+#' TS_duplicated=rbind(TS,xts(20,order.by=c(start(DummyTS()))))
+#' TS_duplicated_seconds=rbind(TS_duplicated,xts(30,order.by=as.POSIXct("2016-01-02 00:01:04")))
+#' TS_clean=clean_timestamps(TS_duplicated_seconds,change_intervall=T,desired_timestep=60*10)
+#' DynPlot(cbind(TS,TS_clean))
+#' 
+clean_timestamps=function(xts,change_intervall=F,default_timestep=60,desired_timestep=60,maxgap=60*60){
+  #warnung einbauen wenn zeitstempel faxen macht, duplicates, nicht gerundet auf mins...
+  ##check for duplicates
+  if (any(duplicated(time(xts)))) {
+    choice <- menu(c("Yes", "No"), title = paste0("There are duplicates in xts - should they be deleted with ?DeleteDuplicteTime"))
+    if (choice == 1) {
+      xts=DeleteDuplicteTime(xts)}
+    
+    if (choice == 2) {
+      print("nothing will be done with timestamp")
+    }}
+
+  ##check if timestamp is minute-even:
+  seconds <- as.numeric(strftime(index(xts), format = "%S"))
+  # Check for irregular seconds
+  if (any(seconds == 0)) {
+    choice <- menu(c("Yes", "No"), title = paste0("Irregular SECONDS in timesteps detected, consider unifying them to full minutes"))
+    
+    if (choice == 1) {
+      xts_min=xts(coredata(xts),order.by=round_date(index(xts),"1 min"))
+      xts_min=DeleteDuplicteTime(xts_min)
+    }
+    xts = xts_min
+    if (choice == 2) {xts=xts}
+  } else {
+    print("No irregular seconds.")
+  }
+
+  ###check for changes in timestamps
+  
+  checktimes = c(NA, difftime(index(xts[-1]), index(xts[-nrow(xts)]), 
+                              units = "secs"))
+  checktimestepsdiff = hist(checktimes, plot = F)
+  if (length(checktimestepsdiff$counts) > 2) {
+    choice <- menu(c("Yes", "No"), title = paste0("Timesteps are not homogenous, consider unifying them to ", 
+                                                  checktimestepsdiff$breaks[which.max(checktimestepsdiff$breaks)], 
+                                                  " seconds?"))
+    if (choice == 1) {
+      mintimevec = min(difftime(index(xts[-1]), index(xts[-nrow(xts)]), 
+                                units = "secs"))
+      fixed_q = FillNaValues(Add.NA(xts, by = mintimevec), 
+                             use = "linear", maxgap = Inf)
+      Q_test = align.time(fixed_q, n = checktimestepsdiff$breaks[which.max(checktimestepsdiff$breaks)])
+      fixed_q = fixed_q[index(Q_test)]
+      fixed_q = DeleteDuplicteTime(fixed_q, Print = F)
+    }
+    xts = fixed_q
+    if (choice == 2) {
+      stop("Fix timesteps manually")
+    }
+  }
+
+  ##adjust timesteps here
+  
+  if(change_intervall==T){
+  dat_temp=FillNaValues(Add.NA(xts,default_timestep),use = "linear", maxgap = maxgap)
+  dat_temp_2=align.time(dat_temp,desired_timestep)
+  dat_temp_3=dat_temp[index(dat_temp_2)]
+  dat_temp_3=DeleteDuplicteTime(dat_temp_3,Print = F)
+  return(dat_temp_3)}
+  else{return(xts)}
+}
+
