@@ -46,14 +46,22 @@ ReadTabletoXTS = function(filename, sep=",", format="%Y-%m-%d %X", header=FALSE,
 #' This function allows to export an xts object to a file. It's based on the write.zoo function. Please use that one if you want more input options.
 #' @param TS Xts to be written to a txt.
 #' @param DirName Destination and name of the file to be safed.
-#' @seealso \link[zoo]{write.zoo}
 #' @export
 #' @examples
 #' WriteXTStoTXT(TS,"C:/Work/R/output.txt")
 #'
-WriteXTStoTXT = function(TS,DirName="C:/Work/R/output.txt"){
-  write.zoo(TS,file=DirName,col.names = T,sep=",", quote=FALSE, na="")}
+#'df <- data.frame(Date = index(zoo_data), Value = coredata(zoo_data))
 
-Sys.setenv(TZ="Etc/GMT-1")
+
+# Write to a file
+
+
+WriteXTStoTXT = function(TS,DirName="C:/Work/R/output.txt"){
+    # Convert to data frame and set the format for the dates
+  df <- data.frame(Date = index(TS), Value = coredata(TS))
+  df$Date <- format(df$Date, "%Y-%m-%d %H:%M:%S")
+  
+  write.table(df, file = DirName, sep = ",",na = "", row.names = FALSE, col.names = TRUE,quote = FALSE)}
+  
 
 
