@@ -485,7 +485,7 @@ ThinOutData=function(data,thin.to=300,style=c("even","tight top","tight bottom")
     DataF = data.frame(XTS_clean[, 1], XTS_clean[,2])}
   else if (is.data.frame(data)){DataF=data}
   else{stop("The input must be a dataframe or an xts.")}
-  DataF = DataF[order(DataF[1]), ]
+  DataF = DataF[order(DataF[, 1]), ]
   x = as.numeric(DataF[, 1])
   y = as.numeric(DataF[, 2])
   min = min(x, na.rm = TRUE)
