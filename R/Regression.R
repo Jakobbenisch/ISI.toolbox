@@ -407,7 +407,7 @@ ConL_Exp_Pot=function(regressionobject){
 Fitall=function(X,Y,poly_order=2){
   #orders data
   DataF=data.frame(X,Y)
-  DataF=DataF[order(DataF[1]),]
+  DataF=DataF[order(DataF[, 1]),]
   x=DataF[,1]
   y=DataF[,2]
 
