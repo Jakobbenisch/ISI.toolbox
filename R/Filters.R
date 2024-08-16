@@ -786,13 +786,20 @@ FixDrift=function(XTS_to_fix,Fix_Info){
 #' HyW=HH[[2]]
 #'
 Separate.To.HyS.HyW=function(TS){
-  Time=as.POSIXct(strftime(time(TS),format = "%m-%d %H:%M:%S"),format = "%m-%d %H:%M:%S",tz = tzone(TS))
-  start=as.POSIXct("01.05. 00:00:00",tz=tzone(TS),format="%d.%m. %H:%M:%S")
-  end=as.POSIXct("01.11. 00:00:00",tz=tzone(TS),format="%d.%m. %H:%M:%S")
-  HyS=Time>start&Time<end
-  Separated=list(TS[HyS],TS[!HyS])
-  names(Separated)=c("Hydrological Summer","Hydrological Winter")
-  return(Separated)}
+  # Extract the month and day from the time index
+  month_day <- format(time(TS), "%m-%d")
+  
+  # Define the logical vector for Hydrological Summer (May to October)
+  HyS <- month_day > "05-01" & month_day < "11-01"
+  
+  # Create the list with separated time series
+  Separated <- list(
+    "Hydrological Summer" = TS[HyS],
+    "Hydrological Winter" = TS[!HyS]
+  )
+  
+  return(Separated)
+}
 
 #' A function for correcting offsets.
 #'
