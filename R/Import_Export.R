@@ -60,7 +60,8 @@ WriteXTStoTXT = function(TS,DirName="C:/Work/R/output.txt"){
     # Convert to data frame and set the format for the dates
   df <- data.frame(Date = index(TS), Value = coredata(TS))
   df$Date <- format(df$Date, "%Y-%m-%d %H:%M:%S")
-  
+  colnames_df=colnames(TS)
+  colnames(df)[2:ncol(df)] <- colnames_df
   write.table(df, file = DirName, sep = ",",na = "", row.names = FALSE, col.names = TRUE,quote = FALSE)}
   
 
