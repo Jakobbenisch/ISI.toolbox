@@ -23,21 +23,21 @@
 #' b=DummyTS(days=14)
 #' c=DummyTS(days=14)
 #' DynPlot(cbind(a,b,c),Axis=c(1,2,2),Labels=c("First","Second","Third"),Events = c("2016-01-02 01:00:00"),Eventnames = c("Eventname"))
-DynPlot = function(X, Title = NULL, Ylab = NULL, Y2lab = NULL, 
-                   Labels = seq(1, dim(X)[2], 1), Dotsize = 1, 
-                   YRange = NULL, Y2Range = NULL, colset = 2, 
-                   Axis = rep(1, dim(X)[2]), Events = NULL, 
-                   Eventnames = NULL, legendwidth = 200) {
+DynPlot <- function(X, Title = NULL, Ylab = NULL, Y2lab = NULL, 
+                    Labels = NULL, Dotsize = 1, YRange = NULL, Y2Range = NULL, 
+                    colset = 2, Axis = rep(1, dim(X)[2]), Events = NULL, Eventnames = NULL, 
+                    legendwidth = 200) {
   
-  # Assign labels to the columns if not provided
-  if (is.null(names(X))) {
-    names(X) <- Labels
+  # Set default Labels if none provided
+  if (is.null(Labels)) {
+    Labels <- seq(1, ncol(X), 1)
   }
   
-  # Define the axis types
-  axis <- c("y", "y2")
+  # Set column names of X to Labels
+  names(X) <- Labels
   
-  # Predefined colors
+  # Define axis and color set
+  axis <- c("y", "y2")
   COLS <- c("rgb(240,163,255)", "rgb(0,117,220)", "rgb(153,63,0)", 
             "rgb(76,0,92)", "rgb(25,25,25)", "rgb(0,92,49)", "rgb(43,206,72)", 
             "rgb(255,204,153)", "rgb(128,128,128)", "rgb(148,255,181)", 
@@ -48,30 +48,31 @@ DynPlot = function(X, Title = NULL, Ylab = NULL, Y2lab = NULL,
             "rgb(153,0,0)", "rgb(255,255,128)", "rgb(255,255,0)", 
             "rgb(255,80,5)")
   
-  # Start building the dygraph
-  d <- dygraph(X, main = Title, ylab = Ylab, group = "1") %>%
+  # Create dygraph with initial settings
+  d <- dygraph(X, main = Title, ylab = Ylab, group = "1") %>% 
     dyOptions(useDataTimezone = TRUE, drawPoints = TRUE, 
               connectSeparatedPoints = TRUE, pointSize = Dotsize, 
-              colors = randomColor(dim(X)[2]))
+              colors = randomColor(ncol(X)))
   
-  # Loop through columns and add dySeries to the dygraph
-  for (i in 1:dim(X)[2]) {
+  # Loop through each series to set axis and color
+  for (i in 1:ncol(X)) {
     d <- d %>% dySeries(names(X)[i], axis = axis[Axis[i]], color = COLS[i])
   }
   
   # Add events if provided
   if (!is.null(Events)) {
     for (k in 1:length(Events)) {
-      d <- d %>% dyEvent(Events[k], Eventnames[k], labelLoc = "top", color = "black", strokePattern = "dashed")
+      d <- d %>% dyEvent(Events[k], Eventnames[k], labelLoc = "top", 
+                         color = "black", strokePattern = "dashed")
     }
   }
   
-  # Add axes settings and other options
-  d <- d %>%
-    dyAxis("y", valueRange = YRange) %>%
-    dyAxis("y2", valueRange = Y2Range, label = Y2lab) %>%
-    dyRangeSelector() %>%
-    dyLegend(width = legendwidth, show = "auto", showZeroValues = TRUE, labelsDiv = NULL, hideOnMouseOut = TRUE)
+  # Set y and y2 axis ranges and add legend
+  d <- d %>% dyAxis("y", valueRange = YRange) %>% 
+    dyAxis("y2", valueRange = Y2Range, label = Y2lab) %>% 
+    dyRangeSelector() %>% 
+    dyLegend(width = legendwidth, show = "auto", showZeroValues = TRUE, 
+             labelsDiv = NULL, hideOnMouseOut = TRUE)
   
   return(d)
 }

@@ -260,10 +260,10 @@ GradFilter=function(TS, abs_grad=9999999,acceptableError=0.01, UnplausibleGapsiz
   if(Analyse){
     grad_abs=abs(grad)
     #printing and plotting gradient statistics
-    cat(paste("mean grad:","\t",sprintf("%.2e",mean(grad_abs)),"\n",
-              "min grad:","\t",sprintf("%.2e",min(grad_abs)),"\n",
-              "max grad:","\t",sprintf("%.2e",max(grad_abs)),"\n",
-              "median grad:","\t",sprintf("%.2e",median(grad_abs)),"\n",sep=""))
+    cat(paste("mean grad:","\t",sprintf("%.2e",mean(grad_abs,na.rm=T)),"\n",
+              "min grad:","\t",sprintf("%.2e",min(grad_abs,na.rm=T)),"\n",
+              "max grad:","\t",sprintf("%.2e",max(grad_abs,na.rm=T)),"\n",
+              "median grad:","\t",sprintf("%.2e",median(grad_abs,na.rm=T)),"\n",sep=""))
     par(mfrow=c(1,2))
     hist(grad, main="Histogram",xlab = "Gradient",breaks = 20)
     plot(index(grad),grad,xlab = "Index",ylab = "Gradient",main = "Location of Outlier")
@@ -841,36 +841,70 @@ CorrectOffset=function(xts,start,end,offset){
 #' DynPlot(cbind(TS,Events))
 #' 
 EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_duration_in_time_steps = 180, 
-                        padding_in_time_steps = 600, padding_ratio = 1/3, na_approx_max_gap = Inf,  
-                        single_events_in_list=FALSE,plot_single_events=FALSE) 
+                        padding_in_time_steps = 900, padding_ratio = 1/4, na_approx_max_gap = Inf, 
+                        single_events_in_list = FALSE, plot_single_events = FALSE) {
+  #df_numeric = na.omit(as.numeric(q_xts))
+  if (any(duplicated(time(q_xts)))) {
+    print("There are duplicates in xts - they will be deleted")
+    q_xts=DeleteDuplicteTime(q_xts,Print = T,return_index = F)
+  }
   
-{
-  df_numeric = na.omit(as.numeric(q_xts))
+  checktimes = c(NA, difftime(index(q_xts[-1]), index(q_xts[-nrow(q_xts)]), 
+                              units = "secs"))
   
-  ###prechecking data set for duplicates
-  if(any(duplicated(time(q_xts)))){
-    stop("There are duplicates in xts - check and delete \n ?DeleteDuplicteTime")}
-  ###prechecking for differences in timesteps
-  checktimes=c(NA,difftime(index(q_xts[-1]),index(q_xts[-nrow(q_xts)]),units="secs"))
-  checktimestepsdiff=hist(checktimes,plot = F)
-  if(length(checktimestepsdiff$counts)>2){
-    choice<-menu(c("Yes","No"),title = paste0("Timesteps are not homogenous, consider unifying them to ",
-                                              checktimestepsdiff$breaks[which.max(checktimestepsdiff$breaks)]," seconds?"))
-    if (choice==1){ 
-      mintimevec=min(difftime(index(q_xts[-1]),index(q_xts[-nrow(q_xts)]),units="secs"))
-      fixed_q=FillNaValues(Add.NA(q_xts,by = mintimevec),use = "linear", maxgap = Inf)
-      Q_test=align.time(fixed_q,n = checktimestepsdiff$breaks[which.max(checktimestepsdiff$breaks)])
-      fixed_q=fixed_q[index(Q_test)]
-      fixed_q=DeleteDuplicteTime(fixed_q,Print = F)}
+  checktimestepsdiff = hist(checktimes, plot = F)
+  
+  counts <- data.frame(table(checktimes))
+  
+  # Sort data by Freq in descending order
+  sorted_data <- counts[order(counts$Freq, decreasing = TRUE), ]
+  
+  # Extract highest and second-highest rows
+  top_two <- as.data.frame(sorted_data[1:2, ])
+  
+  most_frequent_number <- as.numeric(as.character(top_two$checktimes[1]))
+  second_frequent_number <-as.numeric(as.character(top_two$checktimes[2]))
+  
+  
+  if (length(checktimestepsdiff$counts) > 2) {
     
-    q_xts=fixed_q 
-    if(choice==2){stop("Fix timesteps manually")}}
+    ##added to work with data that has an event mode (smaller measuring intervall during events)
+    
+    if(as.numeric(as.character(top_two$checktimes[2]))<as.numeric(as.character(top_two$checktimes[1]))& 
+       as.numeric(as.character(top_two$Freq[2]))>as.numeric(as.character(top_two$Freq[1]))*0.1){ # 10% of values with smaller timestep assumption
+      
+      
+      choice <- menu(c(as.character(most_frequent_number), as.character(second_frequent_number)), title = paste0("Timesteps are not homogenous, consider unifying them to ", 
+                                                                                                                 most_frequent_number, " or ",second_frequent_number,
+                                                                                                                 " seconds?"))
+      
+    }else{
+      print(paste0("Timesteps are not homogenous, they will be unifyied to ",most_frequent_number," seconds."))
+      choice=1}
+    
+    if (choice == 1) {
+      mintimevec = most_frequent_number
+      evenly_q = FillNaValues(Add.NA(q_xts, by = 60), use = "linear", maxgap = Inf)#this can cause problem with recordings below 1 min resolustion
+      q_aligned = align.time(evenly_q, n = mintimevec)
+      fixed_q=evenly_q[!duplicated(index(q_aligned))]
+      
+    }else{
+      mintimevec = second_frequent_number
+      evenly_q = FillNaValues(Add.NA(q_xts, by = 60), use = "linear", maxgap = Inf)#this can cause problem with recordings below 1 min resolustion
+      q_aligned = align.time(evenly_q, n = mintimevec)
+      fixed_q=evenly_q[!duplicated(index(q_aligned))]
+    }
+    
+    numeric_q=as.numeric(fixed_q)}else{
+      
+      numeric_q=q_xts}
+  
   
   if (!is.null(quantile_limit) & is.null(fixed_limit)) {
     if (quantile_limit < 1 | quantile_limit > 99) {
       stop("The quantile_limit must be between 1 and 99.")
     }
-    q_lim = as.numeric(quantile(df_numeric, quantile_limit/100))
+    q_lim = as.numeric(quantile(numeric_q, quantile_limit/100))
     print(paste("Determined quantile limit:", toString(q_lim)))
   }
   else if (is.null(quantile_limit) & !is.null(fixed_limit)) {
@@ -883,11 +917,7 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
     stop("Please provide either quantile_limit or fixed_limit.")
   }
   
-  min_ts_in_sek = min(difftime(index(q_xts[-1]),index(q_xts[-nrow(q_xts)]),units="secs"))
-  df_uni = Add.NA(q_xts, by = min_ts_in_sek)
-  df_uni = na.approx(df_uni, maxgap = na_approx_max_gap)
-  df_uni = na.fill(df_uni, 0)  # if larger than max_gap NAs will be set to zero, dont know if thats reasonable - let me know! 
-  boo = df_numeric > q_lim
+  boo = numeric_q > q_lim
   ev_boo = rollapply(boo, width = min_duration_in_time_steps, 
                      FUN = all)
   ev_boo = c(ev_boo, rep(FALSE, min_duration_in_time_steps - 
@@ -901,7 +931,6 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
       return(c(FALSE, boolean[1:(len - 1)]) | boolean)
     }
   }
-  
   for (i in 1:(min_duration_in_time_steps - 1)) {
     ev_boo = extend_true(ev_boo)
   }
@@ -913,64 +942,68 @@ EventDetector=function (q_xts, quantile_limit = 90, fixed_limit = NULL, min_dura
                             padding_in_time_steps * (1 - padding_ratio))) {
     ev_boo = extend_true(ev_boo)
   }
-  
-  if (single_events_in_list & !plot_single_events){
+  if (single_events_in_list & !plot_single_events) {
     
-    ##build a vector with 1/0 for event/no event
-    df_uni[!ev_boo] = NA
-    Events_logi=na.omit(df_uni)
-    Events_logi[,1]<-1
-    test=cbind(df_uni,Events_logi)
-    test=test[,2]
-    test[is.na(test)]<-0
-    check=(as.numeric(coredata(test)))
-    ##check for the intial change of 0->1 for beginn or 1->0 for end of event
-    final_start=c()
-    final_end=c()
-    for(i in 1:(length(check)-1)){if(check[i] == 0 & check[i+1] == 1) {vec=data.frame(index(df_uni[i]))
-    final_start=c(final_start,vec)}}
-    for(i in 1:(length(check)-1)){if(check[i] == 1 & check[i+1] == 0) {vec=data.frame(index(df_uni[i]))
-    final_end=c(final_end,vec)}}
-    list_of_events=list()
-    for (i in 1:length(final_start)){list_of_events[[i]]=CutTimeSeries(df_uni,final_start[[i]],final_end[[i]])}
-    return(list(list_of_events,df_uni))
+    bool_xts=xts(ev_boo,order.by = index(fixed_q))
+    # Find the points where the value changes from FALSE to TRUE
+    change_points_start <- which(diff(bool_xts) == 1) + 1
+    # Extract the timestamps where these changes occur
+    starts <- index(bool_xts)[change_points_start]
+    # Find the points where the value changes from TRUE to FALSE
+    change_points_end <- which(diff(bool_xts) == -1) + 1
+    # Extract the timestamps where these changes occur
+    ends <- index(bool_xts)[change_points_end]
+    
+    if(length(starts)>length(ends)){#event started and did not end until time series is over
+      ends=c(ends,index(bool_xts[length(bool_xts)]))}
+    
+    list_of_events = list()
+    for (i in 1:length(starts)) {
+      list_of_events[[i]] = CutTimeSeries(fixed_q, starts[i], 
+                                          ends[[i]])
+    }
+    return(list(list_of_events, fixed_q[ev_boo]))
   }
-  else if(plot_single_events & single_events_in_list){
-    
-    ##build a vector with 1/0 for event/no event
-    df_uni[!ev_boo] = NA
-    Events_logi=na.omit(df_uni)
-    Events_logi[,1]<-1
-    test=cbind(df_uni,Events_logi)
-    test=test[,2]
-    test[is.na(test)]<-0
-    check=(as.numeric(coredata(test)))
-    ##check for the intial change of 0->1 for beginn or 1->0 for end of event
-    final_start=c()
-    final_end=c()
-    for(i in 1:(length(check)-1)){if(check[i] == 0 & check[i+1] == 1) {vec=data.frame(index(df_uni[i]))
-    final_start=c(final_start,vec)}}
-    for(i in 1:(length(check)-1)){if(check[i] == 1 & check[i+1] == 0) {vec=data.frame(index(df_uni[i]))
-    final_end=c(final_end,vec)}}
-    list_of_events=list()
-    for (i in 1:length(final_start)){list_of_events[[i]]=CutTimeSeries(df_uni,final_start[[i]],final_end[[i]])}
-    
-    #create plots
-    plot_events=list()
-    for (i in 1:length(list_of_events)){plot_events[[i]]=DynPlot(list_of_events[[i]],Title = paste(i))}
-    return(list(list_of_events,df_uni,plot_events))
-    
+  else if (plot_single_events & single_events_in_list) {
+    fixed_q[!ev_boo] = NA
+    Events_logi = na.omit(fixed_q)
+    Events_logi[, 1] <- 1
+    test = cbind(fixed_q, Events_logi)
+    test = test[, 2]
+    test[is.na(test)] <- 0
+    check = (as.numeric(coredata(test)))
+    final_start = c()
+    final_end = c()
+    for (i in 1:(length(check) - 1)) {
+      if (check[i] == 0 & check[i + 1] == 1) {
+        vec = data.frame(index(fixed_q[i]))
+        final_start = c(final_start, vec)
+      }
+    }
+    for (i in 1:(length(check) - 1)) {
+      if (check[i] == 1 & check[i + 1] == 0) {
+        vec = data.frame(index(fixed_q[i]))
+        final_end = c(final_end, vec)
+      }
+    }
+    list_of_events = list()
+    for (i in 1:length(final_start)) {
+      list_of_events[[i]] = CutTimeSeries(fixed_q, final_start[[i]], 
+                                          final_end[[i]])
+    }
+    plot_events = list()
+    for (i in 1:length(list_of_events)) {
+      plot_events[[i]] = DynPlot(list_of_events[[i]], Title = paste(i))
+    }
+    return(list(list_of_events, fixed_q[ev_boo], plot_events))
   }
-  else{
-    return(df_uni[ev_boo])
+  else {
+    return(fixed_q[ev_boo])
   }
-  
-  if(!single_events_in_list & plot_single_events){
+  if (!single_events_in_list & plot_single_events) {
     stop("single_events_in_list must be also set to TRUE")
   }
-  
 }
-
 
 #' A function for changing time stamps from CE(S)T to GMT-1
 #'
@@ -1041,17 +1074,10 @@ fix_CEST_to_GMT=function(xts){
 #' DynPlot(cbind(TS,TS_clean))
 #' 
 clean_timestamps=function(xts,change_intervall=F,default_timestep=60,desired_timestep=60,maxgap=60*60){
+  
   #warnung einbauen wenn zeitstempel faxen macht, duplicates, nicht gerundet auf mins...
   ##check for duplicates
-  if (any(duplicated(time(xts)))) {
-    choice <- menu(c("Yes", "No"), title = paste0("There are duplicates in xts - should they be deleted with ?DeleteDuplicteTime"))
-    if (choice == 1) {
-      xts=DeleteDuplicteTime(xts)}
-    
-    if (choice == 2) {
-      print("nothing will be done with timestamp")
-    }}
-
+  
   ##check if timestamp is minute-even:
   seconds <- as.numeric(strftime(index(xts), format = "%S"))
   # Check for irregular seconds
@@ -1065,41 +1091,69 @@ clean_timestamps=function(xts,change_intervall=F,default_timestep=60,desired_tim
     xts = xts_min
     if (choice == 2) {xts=xts}
   } else {
-    print("No irregular seconds.")
+    print("No irregular seconds.")}
+  
+  
+  if (any(duplicated(time(xts)))) {
+    print("There are duplicates in xts - they will be deleted")
+    xts=DeleteDuplicteTime(xts,Print = T,return_index = F)
   }
-
-  ###check for changes in timestamps
+  
+  if(change_intervall==T){
+    evenly_q = FillNaValues(Add.NA(xts, by = 60), use = "linear", maxgap = Inf)#this can cause problem with recordings below 1 min resolution
+    q_aligned = align.time(evenly_q, n = desired_timestep)
+    fixed_q=evenly_q[!duplicated(index(q_aligned))]
+    
+}else{
   
   checktimes = c(NA, difftime(index(xts[-1]), index(xts[-nrow(xts)]), 
                               units = "secs"))
-  checktimestepsdiff = hist(checktimes, plot = F)
-  if (length(checktimestepsdiff$counts) > 2) {
-    choice <- menu(c("Yes", "No"), title = paste0("Timesteps are not homogenous, consider unifying them to ", 
-                                                  checktimestepsdiff$breaks[which.max(checktimestepsdiff$breaks)], 
-                                                  " seconds?"))
-    if (choice == 1) {
-      mintimevec = min(difftime(index(xts[-1]), index(xts[-nrow(xts)]), 
-                                units = "secs"))
-      fixed_q = FillNaValues(Add.NA(xts, by = mintimevec), 
-                             use = "linear", maxgap = Inf)
-      Q_test = align.time(fixed_q, n = checktimestepsdiff$breaks[which.max(checktimestepsdiff$breaks)])
-      fixed_q = fixed_q[index(Q_test)]
-      fixed_q = DeleteDuplicteTime(fixed_q, Print = F)
-    }
-    xts = fixed_q
-    if (choice == 2) {
-      stop("Fix timesteps manually")
-    }
-  }
-
-  ##adjust timesteps here
   
-  if(change_intervall==T){
-  dat_temp=FillNaValues(Add.NA(xts,default_timestep),use = "linear", maxgap = maxgap)
-  dat_temp_2=align.time(dat_temp,desired_timestep)
-  dat_temp_3=dat_temp[index(dat_temp_2)]
-  dat_temp_3=DeleteDuplicteTime(dat_temp_3,Print = F)
-  return(dat_temp_3)}
-  else{return(xts)}
-}
+  checktimestepsdiff = hist(checktimes, plot = F)
+  
+  counts <- data.frame(table(checktimes))
+  
+  # Sort data by Freq in descending order
+  sorted_data <- counts[order(counts$Freq, decreasing = TRUE), ]
+  
+  # Extract highest and second-highest rows
+  top_two <- as.data.frame(sorted_data[1:2, ])
+  
+  most_frequent_number <- as.numeric(as.character(top_two$checktimes[1]))
+  second_frequent_number <-as.numeric(as.character(top_two$checktimes[2]))
+  
+  
+  if (length(checktimestepsdiff$counts) > 2) {
+    
+    ##added to work with data that has an event mode (smaller measuring intervall during events)
+    
+    if(as.numeric(as.character(top_two$checktimes[2]))<as.numeric(as.character(top_two$checktimes[1]))& 
+       as.numeric(as.character(top_two$Freq[2]))>as.numeric(as.character(top_two$Freq[1]))*0.1){ # 10% of values with smaller timestep assumption
+      
+      
+      choice <- menu(c(as.character(most_frequent_number), as.character(second_frequent_number)), title = paste0("Timesteps are not homogenous, consider unifying them to ", 
+                                                                                                                 most_frequent_number, " or ",second_frequent_number,
+                                                                                                                 " seconds?"))
+      
+    }else{
+      print(paste0("Timesteps are not homogenous, they will be unifyied to ",most_frequent_number," seconds."))
+      choice=1}
+    
+    if (choice == 1) {
+      mintimevec = most_frequent_number
+      evenly_q = FillNaValues(Add.NA(xts, by = 60), use = "linear", maxgap = Inf)#this can cause problem with recordings below 1 min resolustion
+      q_aligned = align.time(evenly_q, n = mintimevec)
+      fixed_q=evenly_q[!duplicated(index(q_aligned))]
+      
+    }else{
+      mintimevec = second_frequent_number
+      evenly_q = FillNaValues(Add.NA(xts, by = 60), use = "linear", maxgap = Inf)#this can cause problem with recordings below 1 min resolustion
+      q_aligned = align.time(evenly_q, n = mintimevec)
+      fixed_q=evenly_q[!duplicated(index(q_aligned))]}}}
+  
+  return(fixed_q)}
+  
+  
+  
 
+  
